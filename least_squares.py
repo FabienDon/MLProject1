@@ -5,7 +5,7 @@ def least_squares(y, tx):
 
     Args:
         y: shape=(N, )
-        tx: shape=(N,2)
+        tx: shape=(N,d)
 
     Returns:
         w: shape=(d,), the optimal weights that minimize the MSE loss.
