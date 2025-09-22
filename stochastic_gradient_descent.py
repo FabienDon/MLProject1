@@ -26,16 +26,16 @@ def compute_stoch_gradient(y, tx, w):
     return grad
 
 
-def stochastic_gradient_descent(y, tx, initial_w, batch_size, max_iters, gamma):
+def stochastic_gradient_descent(y, tx, initial_w, max_iters, gamma, batch_size=1):
     """The Stochastic Gradient Descent algorithm (SGD).
 
     Args:
         y: shape=(N, )
         tx: shape=(N,2)
         initial_w: shape=(2, ). The initial guess (or the initialization) for the model parameters
-        batch_size: a scalar denoting the number of data points in a mini-batch used for computing the stochastic gradient
         max_iters: a scalar denoting the total number of iterations of SGD
         gamma: a scalar denoting the stepsize
+        batch_size: a scalar denoting the number of data points in a mini-batch used for computing the stochastic gradient
 
     Returns:
         losses: a list of length max_iters containing the loss value (scalar) for each iteration of SGD
