@@ -106,8 +106,8 @@ def replace_invalid_with_nan_inplace(features_dict, invalid_dict):
             if name in features_dict:
                 values = features_dict[name]
                 # make sure it's float so it can hold NaN
-                if not np.issubdtype(values.dtype, np.floating):
-                    values = values.astype(float, copy=False)
+                #if not np.issubdtype(values.dtype, np.floating):
+                #    values = values.astype(float, copy=False)
                 mask = np.isin(values, invalid_values)
                 values[mask] = np.nan
                 features_dict[name] = values
