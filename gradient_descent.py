@@ -40,11 +40,17 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
         loss: final loss value 
     """
     w = initial_w
+    w_opt = w
+    loss_opt = 0
     for n_iter in range(max_iters):
 
         grad = compute_gradient(y, tx, w)
         loss = compute_loss(y, tx, w)
-
+        
         w = w - gamma*grad
 
-    return w, loss
+        if loss < loss_opt:
+            w_opt = w 
+            loss_opt = loss
+
+    return w_opt, loss_opt
