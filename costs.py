@@ -8,8 +8,8 @@ def compute_loss(y, tx, w):
 
     Args:
         y: shape=(N, )
-        tx: shape=(N,2)
-        w: shape=(2,). The vector of model parameters.
+        tx: shape=(N,d)
+        w: shape=(d,). The vector of model parameters.
 
     Returns:
         the value of the loss (a scalar), corresponding to the input parameters w.
