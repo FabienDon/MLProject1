@@ -42,45 +42,55 @@ def build_k_indices(y, k_fold, seed=1):
     k_indices = [indices[k * interval : (k + 1) * interval] for k in range(k_fold)]
     return np.array(k_indices)
 
-def cross_validation(y, x, k_indices, k, model_fn, degree, loss_fn, **kwargs):
+def cross_validation(y, x, k_fold, model_fn, degree, loss_fn, **kwargs):
     """
-    Generic k-th fold cross-validation.
-    
+    Perform k-fold cross-validation and report mean + standard deviation of the loss.
+
     Args:
-        y: shape=(N, )
-        x: shape=(N, )
-        k_indices: output of build_k_indices
-        k: the k-th fold
-        model_fn: function that returns predicted y, e.g., ridge_regression, least_squares, etc.
-        degree: polynomial degree
-        loss_fn: function to compute loss, e.g., rmse, mse
-        kwargs: additional parameters for the model
+        y:         numpy array, shape=(N,)
+        x:         numpy array, shape=(N,)
+        k_fold:    int, number of folds
+        model_fn:  function(y_train, tx_train, **kwargs) -> w
+        degree:    int, polynomial degree for build_poly
+        loss_fn:   function(y, y_pred) -> scalar loss
+        kwargs:    additional args for model_fn (e.g., lambda_ for ridge)
 
     Returns:
-        loss_tr: loss on training data
-        loss_te: loss on test data
+        mean_train_loss, std_train_loss, mean_test_loss, std_test_loss
     """
 
-    # split train/test indices
-    test_idx = k_indices[k]
-    train_idx = k_indices[np.arange(k_indices.shape[0]) != k].reshape(-1)
+    k_indices = build_k_indices(y, k_fold, seed=1)
 
-    x_train, y_train = x[train_idx], y[train_idx]
-    x_test, y_test = x[test_idx], y[test_idx]
+    train_losses = []
+    test_losses = []
 
-    # polynomial expansion
-    tx_train = build_poly(x_train, degree)
-    tx_test = build_poly(x_test, degree)
+    for k in range(k_fold):
+        # Split train/test indices
+        test_idx = k_indices[k]
+        train_idx = k_indices[np.arange(k_fold) != k].reshape(-1)
 
-    # fit model
-    w = model_fn(y_train, tx_train, **kwargs)
+        x_train, y_train = x[train_idx], y[train_idx]
+        x_test, y_test   = x[test_idx], y[test_idx]
 
-    # predict
-    y_pred_train = tx_train @ w
-    y_pred_test = tx_test @ w
+        # Polynomial expansion
+        tx_train = build_poly(x_train, degree)
+        tx_test  = build_poly(x_test, degree)
 
-    # compute losses
-    loss_tr = loss_fn(y_train, y_pred_train)
-    loss_te = loss_fn(y_test, y_pred_test)
+        # Train model
+        w = model_fn(y_train, tx_train, **kwargs)
 
-    return loss_tr, loss_te
+        # Predictions
+        y_pred_train = tx_train @ w
+        y_pred_test  = tx_test @ w
+
+        # Compute loss
+        train_losses.append(loss_fn(y_train, y_pred_train))
+        test_losses.append(loss_fn(y_test, y_pred_test))
+
+    # Compute mean and standard deviation
+    mean_train_loss = np.mean(train_losses)
+    std_train_loss  = np.std(train_losses)
+    mean_test_loss  = np.mean(test_losses)
+    std_test_loss   = np.std(test_losses)
+
+    return mean_train_loss, std_train_loss, mean_test_loss, std_test_loss
