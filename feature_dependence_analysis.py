@@ -1,18 +1,18 @@
 import numpy as np
 
-# --- Load data ---
+# Load data
 X_data = np.genfromtxt("./data/dataset/x_train.csv", delimiter=",", skip_header=1, dtype=np.float32)
 with open("./data/dataset/x_train.csv", "r") as f:
     feature_names = f.readline().strip().split(",")
 
-# --- Vectorized Pearson correlation ---
+# Pearson correlation
 X = np.nan_to_num(X_data, nan=np.nanmean(X_data, axis=0))  # replace NaN with column mean
 X_centered = X - np.mean(X, axis=0)
 X_std = np.std(X_centered, axis=0, ddof=0)
 X_scaled = X_centered / X_std
 pearson_matrix = np.corrcoef(X_scaled, rowvar=False)
 
-# --- Vectorized Spearman correlation ---
+# Spearman correlation
 def rankdata_vec(a):
     ranks = np.empty_like(a, dtype=float)
     for i in range(a.shape[1]):
@@ -35,7 +35,7 @@ def rankdata_vec(a):
 X_ranked = rankdata_vec(X)
 spearman_matrix = np.corrcoef(X_ranked, rowvar=False)
 
-# --- Extract strong correlations only ---
+# Which correlations do we keep ?
 threshold = 0.9
 
 def extract_strong_pairs(matrix, names, threshold):
@@ -50,7 +50,7 @@ def extract_strong_pairs(matrix, names, threshold):
 strong_pearson = extract_strong_pairs(pearson_matrix, feature_names, threshold)
 strong_spearman = extract_strong_pairs(spearman_matrix, feature_names, threshold)
 
-# --- Save results ---
+# Save results
 with open("strong_pearson_features.csv", "w") as f:
     f.write("Feature1,Feature2,Pearson_r\n")
     for f1, f2, r in strong_pearson:
@@ -61,4 +61,4 @@ with open("strong_spearman_features.csv", "w") as f:
     for f1, f2, r in strong_spearman:
         f.write(f"{f1},{f2},{r:.6f}\n")
 
-print("✅ Strongly correlated features saved to 'strong_pearson_features.csv' and 'strong_spearman_features.csv'")
+print("Strongly correlated features saved to 'strong_pearson_features.csv' and 'strong_spearman_features.csv'")
