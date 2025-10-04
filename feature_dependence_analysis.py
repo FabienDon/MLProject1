@@ -36,7 +36,7 @@ X_ranked = rankdata_vec(X)
 spearman_matrix = np.corrcoef(X_ranked, rowvar=False)
 
 # Which correlations do we keep ?
-threshold = 0.9
+threshold = 0.5
 
 def extract_strong_pairs(matrix, names, threshold):
     strong_pairs = []
