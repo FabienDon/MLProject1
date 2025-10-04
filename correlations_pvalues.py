@@ -39,7 +39,7 @@ def corr_pvalues(x, y):
     else:
         t = abs(r) * sqrt((n - 2) / (1 - r**2))
         # For df > 30, t ~ normal
-        p = 2 * (1 - normal_cdf(t))
+        p = max(2 * (1 - normal_cdf(t)), 1e-300)
 
     return r, p
 
@@ -57,3 +57,38 @@ with open("./correlations.txt", "w") as f:
         f.write(f"{name}\t{r:.6f}\t{p:.6e}\n")
 
 print("Correlations and p-values saved to correlations.txt")
+
+# --- Helper: rank data (average ranks for ties) ---
+def rankdata(a):
+    """Return ranks (1-based), averaging ties."""
+    a = np.asarray(a)
+    sorter = np.argsort(a)
+    inv = np.empty_like(sorter)
+    inv[sorter] = np.arange(len(a))
+    arr = a[sorter]
+    ranks = np.zeros_like(a, dtype=float)
+    start = 0
+    while start < len(arr):
+        end = start + 1
+        while end < len(arr) and arr[end] == arr[start]:
+            end += 1
+        ranks[start:end] = (start + end - 1) / 2.0 + 1  # average rank
+        start = end
+    return ranks[inv]
+
+# --- Compute Spearman correlations ---
+spearman_results = {}
+for i, name in enumerate(feature_names):
+    col = X_data[:, i]
+    col_ranks = rankdata(col)
+    y_ranks = rankdata(y_data)
+    r, p = corr_pvalues(col_ranks, y_ranks)
+    spearman_results[name] = (r, p)
+
+# --- Save Spearman results ---
+with open("./spearman_correlations.txt", "w") as f:
+    f.write("Feature\tSpearman_r\tP-value\n")
+    for name, (r, p) in spearman_results.items():
+        f.write(f"{name}\t{r:.6f}\t{p:.6e}\n")
+
+print("Spearman correlations and p-values saved to spearman_correlations.txt")
