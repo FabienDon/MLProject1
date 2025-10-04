@@ -3,6 +3,9 @@
 import csv
 import numpy as np
 import os
+from pand import FastFrame
+
+
 
 def load_csv_data(data_path, sub_sample=False, keep_cols=None):
     """
@@ -87,7 +90,7 @@ def drop_and_keep_features(train_dict, test_dict, fields_to_drop):
     train_clean = {name: train_dict[name] for name in final_keep}
     test_clean  = {name: test_dict[name] for name in final_keep}
 
-    return train_clean, test_clean, final_keep
+    return train_clean, test_clean
 
 
 def replace_invalid_with_nan_inplace(features_dict, invalid_dict):
